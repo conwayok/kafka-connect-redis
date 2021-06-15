@@ -33,7 +33,7 @@ abstract class SinkOperation {
   public static final SinkOperation NONE = new NoneOperation(null);
 
   public final Type type;
-  private final RedisSinkConnectorConfig config;
+  protected final RedisSinkConnectorConfig config;
 
   SinkOperation(Type type, RedisSinkConnectorConfig config) {
     this.type = type;
@@ -66,7 +66,7 @@ abstract class SinkOperation {
   protected void waitAll(List<RedisFuture<?>> futures) throws InterruptedException {
     RedisFuture<?>[] futuresArray = futures.toArray(new RedisFuture<?>[0]);
     if (!LettuceFutures.awaitAll(this.config.operationTimeoutMs, TimeUnit.MILLISECONDS, futuresArray)) {
-      futures.forEach(f-> f.cancel(true));
+      futures.forEach(f -> f.cancel(true));
       throw new RetriableException(
           String.format("Timeout after %s ms while waiting for operation to complete.", this.config.operationTimeoutMs)
       );
@@ -135,7 +135,13 @@ abstract class SinkOperation {
 
       List<RedisFuture<?>> futures = new ArrayList<>();
       futures.add(asyncCommands.mset(this.sets));
-      this.sets.forEach((k, v) -> futures.add(asyncCommands.expire(k, 5)));
+
+      long expire = this.config.expire;
+
+      if (expire > 0) {
+        this.sets.forEach((k, v) -> futures.add(asyncCommands.expire(k, expire)));
+      }
+
       asyncCommands.flushCommands();
       waitAll(futures);
     }

@@ -1,12 +1,12 @@
 /**
  * Copyright © 2017 Jeremy Custenborder (jcustenborder@gmail.com)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  */
 package com.github.jcustenborder.kafka.connect.redis;
 
+import io.lettuce.core.LettuceFutures;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
 import org.apache.kafka.connect.errors.RetriableException;
@@ -60,6 +61,18 @@ abstract class SinkOperation {
       );
     }
   }
+
+
+  protected void waitAll(List<RedisFuture<?>> futures) throws InterruptedException {
+    RedisFuture<?>[] futuresArray = futures.toArray(new RedisFuture<?>[0]);
+    if (!LettuceFutures.awaitAll(this.config.operationTimeoutMs, TimeUnit.MILLISECONDS, futuresArray)) {
+      futures.forEach(f-> f.cancel(true));
+      throw new RetriableException(
+          String.format("Timeout after %s ms while waiting for operation to complete.", this.config.operationTimeoutMs)
+      );
+    }
+  }
+
 
   public static SinkOperation create(Type type, RedisSinkConnectorConfig config, int size) {
     SinkOperation result;
@@ -119,8 +132,12 @@ abstract class SinkOperation {
     @Override
     public void execute(RedisClusterAsyncCommands<byte[], byte[]> asyncCommands) throws InterruptedException {
       log.debug("execute() - Calling mset with {} value(s)", this.sets.size());
-      RedisFuture<?> future = asyncCommands.mset(this.sets);
-      wait(future);
+
+      List<RedisFuture<?>> futures = new ArrayList<>();
+      futures.add(asyncCommands.mset(this.sets));
+      this.sets.forEach((k, v) -> futures.add(asyncCommands.expire(k, 5)));
+      asyncCommands.flushCommands();
+      waitAll(futures);
     }
 
     @Override
@@ -147,6 +164,7 @@ abstract class SinkOperation {
       log.debug("execute() - Calling del with {} value(s)", this.deletes.size());
       byte[][] deletes = this.deletes.toArray(new byte[this.deletes.size()][]);
       RedisFuture<?> future = asyncCommands.del(deletes);
+      asyncCommands.flushCommands();
       wait(future);
     }
 

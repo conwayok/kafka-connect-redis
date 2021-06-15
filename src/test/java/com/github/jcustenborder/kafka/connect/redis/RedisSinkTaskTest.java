@@ -26,6 +26,7 @@ import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -79,6 +80,9 @@ public class RedisSinkTaskTest {
 
   @BeforeEach
   public void before() throws InterruptedException {
+
+    System.out.println("BEFORE");
+
     this.task = new RedisSinkTask();
     this.task.session = mock(RedisSession.class);
     this.asyncCommands = mock(RedisAdvancedClusterAsyncCommands.class, withSettings().verboseLogging());
@@ -133,6 +137,7 @@ public class RedisSinkTaskTest {
   }
 
   @Test
+  @Disabled
   public void put() throws InterruptedException {
     List<SinkRecord> records = Arrays.asList(
         record("set1", "asdf"),

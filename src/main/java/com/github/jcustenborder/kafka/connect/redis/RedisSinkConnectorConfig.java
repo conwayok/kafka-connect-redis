@@ -43,7 +43,7 @@ class RedisSinkConnectorConfig extends RedisConnectorConfig {
     this.operationTimeoutMs = getLong(OPERATION_TIMEOUT_MS_CONF);
     String charset = getString(CHARSET_CONF);
     this.charset = Charset.forName(charset);
-    this.expire = getLong("redis.key.expire.ms");
+    this.expire = getLong(EXPIRE_CONF);
   }
 
   public static ConfigDef config() {

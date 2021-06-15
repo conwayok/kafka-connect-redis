@@ -1,4 +1,8 @@
 
+
+# FORK INFO:
+This is fork of the redis connector adds a `redis.key.expire.secs` config 
+
 # Introduction
 
 The Redis plugin is a collection of connectors that are used to interact with a Redis cluster.

@@ -77,6 +77,8 @@ class RedisSessionFactoryImpl implements RedisSessionFactory {
       this.connection = connection;
       this.asyncCommands = asyncCommands;
       this.config = config;
+
+      this.asyncCommands.setAutoFlushCommands(false);
     }
 
     public AbstractRedisClient client() {

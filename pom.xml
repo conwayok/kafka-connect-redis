@@ -26,7 +26,7 @@
         <version>2.2.1-cp1</version>
     </parent>
     <artifactId>kafka-connect-redis</artifactId>
-    <version>0.0.1-conwayok</version>
+    <version>0.0.1-conwayok-fork</version>
     <name>kafka-connect-redis</name>
     <description>A Kafka Connect plugin for interacting with Redis.</description>
     <url>https://github.com/jcustenborder/kafka-connect-redis</url>

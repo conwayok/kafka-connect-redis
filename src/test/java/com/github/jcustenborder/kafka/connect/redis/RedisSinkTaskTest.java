@@ -26,7 +26,6 @@ import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -101,7 +100,7 @@ class RedisSinkTaskTest {
 
 
   @Test
-  public void nonByteOrStringKey() {
+  void nonByteOrStringKey() {
     DataException exception = assertThrows(DataException.class, () -> {
       this.task.put(
           Arrays.asList(
@@ -120,7 +119,7 @@ class RedisSinkTaskTest {
   }
 
   @Test
-  public void nonByteOrStringValue() {
+  void nonByteOrStringValue() {
     DataException exception = assertThrows(DataException.class, () -> {
       this.task.put(
           Arrays.asList(
@@ -140,8 +139,7 @@ class RedisSinkTaskTest {
   }
 
   @Test
-  @Disabled
-  public void put() throws InterruptedException {
+  void put() throws InterruptedException {
     List<SinkRecord> records = Arrays.asList(
         record("set1", "asdf"),
         record("set2", "asdf"),
